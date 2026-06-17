@@ -11,7 +11,7 @@ import {
   toggleCell,
   undoLastMark,
 } from "../lib/nonogarm/round.ts";
-import { scoreActorGuess, scorePatchSolve } from "../lib/nonogarm/scoring.ts";
+import { getLevelProgress, scoreActorGuess, scorePatchSolve } from "../lib/nonogarm/scoring.ts";
 import { isActorMatch, normalizeGuess } from "../lib/nonogarm/matching.ts";
 
 test("getPatchSize returns 8 for center patches and 5 for outer patches", () => {
@@ -84,6 +84,27 @@ test("scoreActorGuess rewards difficulty, speed, and unrevealed patches", () => 
   );
 });
 
+test("getLevelProgress starts at level zero and advances from score XP", () => {
+  assert.deepEqual(getLevelProgress(0), {
+    level: 0,
+    currentXp: 0,
+    nextLevelXp: 600,
+    progressPercent: 0,
+  });
+  assert.deepEqual(getLevelProgress(599), {
+    level: 0,
+    currentXp: 599,
+    nextLevelXp: 600,
+    progressPercent: 100,
+  });
+  assert.deepEqual(getLevelProgress(1450), {
+    level: 2,
+    currentXp: 250,
+    nextLevelXp: 600,
+    progressPercent: 42,
+  });
+});
+
 test("actor data includes three actors with sixteen correctly sized patches each", () => {
   assert.equal(ACTORS.length, 3);
   for (const actor of ACTORS) {
@@ -96,6 +117,8 @@ test("actor data includes three actors with sixteen correctly sized patches each
 test("round state supports selecting, marking, undoing, clearing, and solving a patch", () => {
   let round = createRound(ACTORS[0], 0);
   const patch = ACTORS[0].patches.find((candidate) => candidate.size === 5)!;
+
+  assert.equal(round.streak, 0);
 
   round = selectPatch(round, patch.id, 0);
   assert.equal(round.selectedPatchId, patch.id);
@@ -122,7 +145,32 @@ test("round state supports selecting, marking, undoing, clearing, and solving a 
   const result = submitActivePatch(round, 12);
   assert.equal(result.solved, true);
   assert.equal(result.round.revealedPatchIds.includes(patch.id), true);
+  assert.equal(result.round.streak, 1);
   assert.ok(result.patchScore >= 50);
+});
+
+test("round state resets streak after a wrong patch check or actor guess", () => {
+  let round = createRound(ACTORS[0], 0);
+  const patches = ACTORS[0].patches.filter((candidate) => candidate.size === 5);
+
+  round = selectPatch(round, patches[0].id, 0);
+  for (let row = 0; row < patches[0].solution.length; row += 1) {
+    for (let col = 0; col < patches[0].solution[row].length; col += 1) {
+      if (patches[0].solution[row][col]) {
+        round = toggleCell(round, row, col, "filled");
+      }
+    }
+  }
+
+  round = submitActivePatch(round, 8).round;
+  assert.equal(round.streak, 1);
+
+  round = selectPatch(round, patches[1].id, 10);
+  round = submitActivePatch(round, 14).round;
+  assert.equal(round.streak, 0);
+
+  round = submitActorGuess(round, "not right", 20).round;
+  assert.equal(round.streak, 0);
 });
 
 test("round state keeps wrong guesses alive and ends on a forgiving correct guess", () => {
@@ -135,5 +183,6 @@ test("round state keeps wrong guesses alive and ends on a forgiving correct gues
   const right = submitActorGuess(wrong.round, ACTORS[0].aliases[0], 25);
   assert.equal(right.round.status, "won");
   assert.equal(right.correct, true);
+  assert.equal(right.round.streak, 1);
   assert.ok(right.actorScore > 0);
 });

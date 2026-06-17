@@ -11,6 +11,7 @@ export type RoundState = {
   currentMarks: BoardMarks;
   revealedPatchIds: string[];
   score: number;
+  streak: number;
   startedAt: number;
   activePatchStartedAt: number | null;
   wrongSubmitsByPatch: Record<string, number>;
@@ -30,6 +31,7 @@ export function createRound(actor: ActorEntry, nowSeconds: number): RoundState {
     currentMarks: [],
     revealedPatchIds: [],
     score: 0,
+    streak: 0,
     startedAt: nowSeconds,
     activePatchStartedAt: null,
     wrongSubmitsByPatch: {},
@@ -129,6 +131,7 @@ export function submitActivePatch(
           ...round.wrongSubmitsByPatch,
           [patch.id]: wrongSubmits + 1,
         },
+        streak: 0,
         guessFeedback: "Not quite. Check the clues.",
       },
       solved: false,
@@ -146,6 +149,7 @@ export function submitActivePatch(
       activePatchStartedAt: null,
       revealedPatchIds: [...round.revealedPatchIds, patch.id],
       score: round.score + patchScore,
+      streak: round.streak + 1,
       undoStack: [],
       guessFeedback: `Patch solved +${patchScore}.`,
     },
@@ -169,7 +173,7 @@ export function submitActorGuess(
 
   if (!isActorMatch(round.actor, guess)) {
     return {
-      round: { ...round, guessFeedback: "No match yet. Reveal another patch?" },
+      round: { ...round, streak: 0, guessFeedback: "No match yet. Reveal another patch?" },
       correct: false,
       actorScore: 0,
     };
@@ -186,6 +190,7 @@ export function submitActorGuess(
     round: {
       ...round,
       score: round.score + actorScore,
+      streak: round.streak + 1,
       status: "won",
       guessFeedback: `Correct: ${round.actor.displayName}! +${actorScore}.`,
     },

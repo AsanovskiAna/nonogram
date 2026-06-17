@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { getClues } from "@/lib/nonogarm/puzzle.ts";
+import { getLevelProgress } from "@/lib/nonogarm/scoring.ts";
 import type { RoundStatus } from "@/lib/nonogarm/round.ts";
 import type {
   ActorEntry,
@@ -63,9 +64,12 @@ type StatusRailProps = {
   multiplier: number;
   score: number;
   status: RoundStatus;
+  streak: number;
 };
 
-export function StatusRail({ difficulty, multiplier, score, status }: StatusRailProps) {
+export function StatusRail({ difficulty, multiplier, score, status, streak }: StatusRailProps) {
+  const levelProgress = getLevelProgress(score);
+  const levelLabel = levelProgress.level.toString().padStart(2, "0");
   const items = [
     { icon: Puzzle, label: "Puzzle", color: "bg-[#39d4ee]" },
     { icon: Trophy, label: "Scores", color: "bg-white" },
@@ -74,8 +78,8 @@ export function StatusRail({ difficulty, multiplier, score, status }: StatusRail
   ];
 
   return (
-    <aside className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-      <div className={`${panelClass} overflow-hidden sm:col-span-2 xl:col-span-1`}>
+    <aside className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+      <div className={`${panelClass} overflow-hidden sm:col-span-2 lg:col-span-1`}>
         {items.map(({ icon: Icon, label, color }) => (
           <div
             className={`flex items-center justify-between border-b-4 border-black px-4 py-3 font-mono font-black uppercase last:border-b-0 ${color}`}
@@ -92,21 +96,23 @@ export function StatusRail({ difficulty, multiplier, score, status }: StatusRail
       <div className={`${panelClass} flex flex-col items-center justify-center gap-2 p-4 text-center`}>
         <span className="font-mono text-2xl font-black uppercase">Streak</span>
         <span className="font-mono text-6xl font-black text-[#ff3f9a] [-webkit-text-stroke:2px_#000]">
-          x3
+          x{streak}
         </span>
       </div>
       <div className="border-4 border-black bg-[#ff8a00] p-4 font-mono font-black uppercase shadow-[8px_8px_0_#000]">
         <div className="flex items-center justify-between gap-3">
-          <span>Level 04</span>
+          <span>Level {levelLabel}</span>
           <span>{status === "won" ? "Solved" : "Live"}</span>
         </div>
         <div className="mt-4 h-7 border-4 border-black bg-white">
           <div
             className="h-full bg-black"
-            style={{ width: `${Math.min(100, Math.max(12, score / 18))}%` }}
+            style={{ width: `${levelProgress.progressPercent}%` }}
           />
         </div>
-        <p className="mt-3 text-sm">{score} / 1800 XP</p>
+        <p className="mt-3 text-sm">
+          {levelProgress.currentXp} / {levelProgress.nextLevelXp} XP
+        </p>
         <p className={`mt-3 border-4 border-black px-3 py-2 ${difficultyColor(difficulty)}`}>
           {difficulty} x{multiplier.toFixed(1)}
         </p>
@@ -335,9 +341,6 @@ export function PortraitReveal({
           );
         })}
       </div>
-      <div className="absolute left-1/2 top-1/2 w-[36%] -translate-x-1/2 -translate-y-1/2 border-4 border-black bg-[#ffd60a] px-3 py-1 text-center font-mono text-sm font-black uppercase shadow-[4px_4px_0_#000]">
-        {status === "won" ? actor.displayName : "Clue patch"}
-      </div>
     </section>
   );
 }
@@ -364,7 +367,7 @@ export function GuessPanel({
   return (
     <section className="flex flex-col gap-3">
       <form
-        className="grid gap-3 sm:grid-cols-[1fr_170px]"
+        className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_150px] xl:grid-cols-[minmax(0,1fr)_170px]"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit();
@@ -372,22 +375,22 @@ export function GuessPanel({
       >
         <input
           aria-label="Guess actor"
-          className="min-h-16 border-4 border-black bg-white px-5 font-mono text-2xl font-black uppercase shadow-[6px_6px_0_#000] outline-none focus:bg-[#fff7e8]"
+          className="min-h-16 min-w-0 border-4 border-black bg-white px-5 font-mono text-2xl font-black uppercase shadow-[6px_6px_0_#000] outline-none focus:bg-[#fff7e8]"
           disabled={disabled}
           onChange={(event) => onGuessChange(event.target.value)}
           placeholder="WHO IS IT?"
           value={guess}
         />
         <button
-          className={`${buttonClass} bg-[#ff3f9a] text-2xl`}
+          className={`${buttonClass} min-w-0 bg-[#ff3f9a] text-2xl`}
           disabled={disabled}
           type="submit"
         >
           Guess
         </button>
       </form>
-      <div className="grid gap-3 sm:grid-cols-[1fr_170px]">
-        <p className="min-h-14 border-4 border-black bg-white px-4 py-3 font-mono font-black shadow-[5px_5px_0_#000]">
+      <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_150px] xl:grid-cols-[minmax(0,1fr)_170px]">
+        <p className="min-h-14 min-w-0 border-4 border-black bg-white px-4 py-3 font-mono font-black shadow-[5px_5px_0_#000]">
           {feedback || "Solve a patch or take a shot."}
         </p>
         <button className={`${buttonClass} bg-[#caff24]`} onClick={onNewRound} type="button">
@@ -400,7 +403,6 @@ export function GuessPanel({
 }
 
 type ScoreHudProps = {
-  activePatch: ActorPatch | null;
   elapsedSeconds: number;
   revealedCount: number;
   score: number;
@@ -408,7 +410,6 @@ type ScoreHudProps = {
 };
 
 export function ScoreHud({
-  activePatch,
   elapsedSeconds,
   revealedCount,
   score,
@@ -420,12 +421,11 @@ export function ScoreHud({
     { label: "Score", value: score.toString(), color: "bg-[#39d4ee]" },
     { label: "Time", value: formatTime(elapsedSeconds), color: "bg-[#caff24]" },
     { label: "Revealed", value: `${revealedCount}/${totalPatches}`, color: "bg-[#ff8a00]" },
-    { label: "Puzzle", value: activePatch ? `${activePatch.size} x ${activePatch.size}` : "--", color: "bg-white" },
   ];
 
   return (
     <section className="grid gap-3">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-3">
         {tiles.map((tile) => (
           <div
             className={`border-4 border-black p-3 text-center font-mono font-black uppercase shadow-[6px_6px_0_#000] ${tile.color}`}

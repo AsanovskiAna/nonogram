@@ -90,16 +90,17 @@ export function GameShell() {
     <main className="min-h-screen bg-[#fff7e8] p-3 text-black sm:p-5 xl:p-7">
       <div className="mx-auto flex w-full max-w-[1720px] flex-col gap-5">
         <HeaderBanner />
-        <section className="grid gap-5 xl:grid-cols-[minmax(240px,0.82fr)_minmax(520px,2.2fr)_minmax(420px,1.55fr)]">
-          <div className="order-5 xl:order-none">
+        <section className="grid gap-4 lg:grid-cols-[minmax(190px,0.65fr)_minmax(430px,1.65fr)_minmax(340px,1.25fr)] xl:gap-5 xl:grid-cols-[minmax(240px,0.82fr)_minmax(520px,2.2fr)_minmax(420px,1.55fr)]">
+          <div className="order-5 lg:order-none">
             <StatusRail
               difficulty={round.actor.difficulty}
               multiplier={round.actor.difficultyMultiplier}
               score={round.score}
               status={round.status}
+              streak={round.streak}
             />
           </div>
-          <div className="order-3 flex min-w-0 flex-col gap-4 xl:order-none">
+          <div className="order-3 flex min-w-0 flex-col gap-4 lg:order-none">
             <NonogramBoard
               activePatch={activePatch}
               disabled={round.status === "won"}
@@ -118,8 +119,8 @@ export function GameShell() {
               onUndo={() => setRound(undoLastMark)}
             />
           </div>
-          <div className="order-2 flex min-w-0 flex-col gap-4 xl:order-none">
-            <div className="order-2 xl:order-1">
+          <div className="order-2 flex min-w-0 flex-col gap-4 lg:order-none">
+            <div className="order-2 lg:order-1">
               <PortraitReveal
                 actor={round.actor}
                 revealedPatchIds={round.revealedPatchIds}
@@ -128,7 +129,7 @@ export function GameShell() {
                 onSelectPatch={handleSelectPatch}
               />
             </div>
-            <div className="order-3 xl:order-2">
+            <div className="order-3 lg:order-2">
               <GuessPanel
                 disabled={round.status === "won"}
                 feedback={round.guessFeedback}
@@ -139,9 +140,8 @@ export function GameShell() {
                 onSubmit={handleGuess}
               />
             </div>
-            <div className="order-1 xl:order-3">
+            <div className="order-1 lg:order-3">
               <ScoreHud
-                activePatch={activePatch}
                 elapsedSeconds={elapsedSeconds}
                 revealedCount={round.revealedPatchIds.length}
                 score={round.score}
