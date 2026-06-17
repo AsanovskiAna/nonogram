@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { ACTORS } from "../lib/nonogarm/actors.ts";
+import { getBoardFrame, getColumnClueLines } from "../lib/nonogarm/layout.ts";
 import { getClues, getPatchSize, isSolved } from "../lib/nonogarm/puzzle.ts";
 import {
   clearActivePatch,
@@ -130,6 +131,19 @@ test("actor data includes three actors with sixteen correctly sized patches each
     assert.equal(actor.patches.filter((patch) => patch.size === 8).length, 4);
     assert.equal(actor.patches.filter((patch) => patch.size === 5).length, 12);
   }
+});
+
+test("getBoardFrame gives 8x8 puzzles a larger width and height than 5x5 puzzles", () => {
+  const fiveFrame = getBoardFrame(5);
+  const eightFrame = getBoardFrame(8);
+
+  assert.ok(eightFrame.maxWidth > fiveFrame.maxWidth);
+  assert.ok(eightFrame.minHeight > fiveFrame.minHeight);
+});
+
+test("getColumnClueLines keeps top clues stacked in order", () => {
+  assert.deepEqual(getColumnClueLines([1, 2, 1]), ["1", "2", "1"]);
+  assert.deepEqual(getColumnClueLines([0]), ["0"]);
 });
 
 test("round state supports selecting, marking, undoing, clearing, and solving a patch", () => {

@@ -14,6 +14,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { getBoardFrame, getColumnClueLines } from "@/lib/nonogarm/layout.ts";
 import { getClues } from "@/lib/nonogarm/puzzle.ts";
 import { getLevelProgress } from "@/lib/nonogarm/scoring.ts";
 import type { RoundStatus } from "@/lib/nonogarm/round.ts";
@@ -28,7 +29,6 @@ import type {
 type PlayMode = Exclude<CellMark, "empty">;
 
 const panelClass = "border-4 border-black bg-white shadow-[8px_8px_0_#000]";
-const boardPanelHeightClass = "min-h-[540px]";
 const buttonClass =
   "inline-flex min-h-12 items-center justify-center gap-2 border-4 border-black px-4 py-2 font-mono text-sm font-black uppercase shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -138,9 +138,12 @@ export function NonogramBoard({
   onCellClick,
 }: NonogramBoardProps) {
   if (!activePatch) {
+    const frame = getBoardFrame(5);
+
     return (
       <section
-        className={`${panelClass} ${boardPanelHeightClass} mx-auto flex w-full max-w-[500px] items-center justify-center p-6 text-center`}
+        className={`${panelClass} mx-auto flex w-full items-center justify-center p-6 text-center`}
+        style={{ maxWidth: frame.maxWidth, minHeight: frame.minHeight }}
       >
         <div className="max-w-md">
           <Sparkles className="mx-auto mb-4 size-16 stroke-[3]" aria-hidden="true" />
@@ -156,11 +159,12 @@ export function NonogramBoard({
   const rowClues = getClues(activePatch.solution, "row");
   const columnClues = getClues(activePatch.solution, "column");
   const size = activePatch.size;
-  const boardWidthClass = size === 5 ? "max-w-[500px]" : "max-w-[620px]";
+  const frame = getBoardFrame(size);
 
   return (
     <section
-      className={`${panelClass} ${boardPanelHeightClass} mx-auto w-full ${boardWidthClass} p-3 sm:p-4`}
+      className={`${panelClass} mx-auto w-full p-3 sm:p-4`}
+      style={{ maxWidth: frame.maxWidth, minHeight: frame.minHeight }}
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 font-mono font-black uppercase">
         <h2 className="text-xl">Patch {activePatch.row + 1}-{activePatch.col + 1}</h2>
@@ -176,9 +180,14 @@ export function NonogramBoard({
         {columnClues.map((clue, index) => (
           <div
             className="flex min-h-16 items-end justify-center border-b-4 border-r-4 border-black bg-[#fff7e8] p-1 font-mono text-base font-black last:border-r-0"
+            data-column-clue={index}
             key={`col-${index}`}
           >
-            <span className="leading-tight">{clue.join(" ")}</span>
+            <span className="flex flex-col items-center leading-tight">
+              {getColumnClueLines(clue).map((line, lineIndex) => (
+                <span key={`${index}-${lineIndex}`}>{line}</span>
+              ))}
+            </span>
           </div>
         ))}
         {Array.from({ length: size }, (_, rowIndex) => (
