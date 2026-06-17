@@ -11,7 +11,12 @@ import {
   toggleCell,
   undoLastMark,
 } from "../lib/nonogarm/round.ts";
-import { getLevelProgress, scoreActorGuess, scorePatchSolve } from "../lib/nonogarm/scoring.ts";
+import {
+  bankRoundScore,
+  getLevelProgress,
+  scoreActorGuess,
+  scorePatchSolve,
+} from "../lib/nonogarm/scoring.ts";
 import { isActorMatch, normalizeGuess } from "../lib/nonogarm/matching.ts";
 
 test("getPatchSize returns 8 for center patches and 5 for outer patches", () => {
@@ -103,6 +108,19 @@ test("getLevelProgress starts at level zero and advances from score XP", () => {
     nextLevelXp: 600,
     progressPercent: 42,
   });
+});
+
+test("bankRoundScore carries level XP across actor rounds", () => {
+  const careerScore = bankRoundScore(500, 250);
+
+  assert.equal(careerScore, 750);
+  assert.deepEqual(getLevelProgress(careerScore), {
+    level: 1,
+    currentXp: 150,
+    nextLevelXp: 600,
+    progressPercent: 25,
+  });
+  assert.equal(bankRoundScore(careerScore, 0), 750);
 });
 
 test("actor data includes three actors with sixteen correctly sized patches each", () => {

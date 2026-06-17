@@ -28,6 +28,7 @@ import type {
 type PlayMode = Exclude<CellMark, "empty">;
 
 const panelClass = "border-4 border-black bg-white shadow-[8px_8px_0_#000]";
+const boardPanelHeightClass = "min-h-[540px]";
 const buttonClass =
   "inline-flex min-h-12 items-center justify-center gap-2 border-4 border-black px-4 py-2 font-mono text-sm font-black uppercase shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -138,7 +139,9 @@ export function NonogramBoard({
 }: NonogramBoardProps) {
   if (!activePatch) {
     return (
-      <section className={`${panelClass} flex min-h-[430px] items-center justify-center p-6 text-center`}>
+      <section
+        className={`${panelClass} ${boardPanelHeightClass} mx-auto flex w-full max-w-[500px] items-center justify-center p-6 text-center`}
+      >
         <div className="max-w-md">
           <Sparkles className="mx-auto mb-4 size-16 stroke-[3]" aria-hidden="true" />
           <h2 className="font-mono text-3xl font-black uppercase">Choose a patch</h2>
@@ -153,9 +156,12 @@ export function NonogramBoard({
   const rowClues = getClues(activePatch.solution, "row");
   const columnClues = getClues(activePatch.solution, "column");
   const size = activePatch.size;
+  const boardWidthClass = size === 5 ? "max-w-[500px]" : "max-w-[620px]";
 
   return (
-    <section className={`${panelClass} p-3 sm:p-5`}>
+    <section
+      className={`${panelClass} ${boardPanelHeightClass} mx-auto w-full ${boardWidthClass} p-3 sm:p-4`}
+    >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 font-mono font-black uppercase">
         <h2 className="text-xl">Patch {activePatch.row + 1}-{activePatch.col + 1}</h2>
         <span className="border-4 border-black bg-[#ffd60a] px-3 py-1">{size} x {size}</span>
@@ -163,13 +169,13 @@ export function NonogramBoard({
       <div
         className="grid overflow-hidden border-4 border-black bg-black"
         style={{
-          gridTemplateColumns: `minmax(4.5rem, 5.75rem) repeat(${size}, minmax(0, 1fr))`,
+          gridTemplateColumns: `minmax(3.75rem, 4.75rem) repeat(${size}, minmax(0, 1fr))`,
         }}
       >
         <div className="border-b-4 border-r-4 border-black bg-[#fff7e8]" />
         {columnClues.map((clue, index) => (
           <div
-            className="flex min-h-20 items-end justify-center border-b-4 border-r-4 border-black bg-[#fff7e8] p-1 font-mono text-lg font-black last:border-r-0"
+            className="flex min-h-16 items-end justify-center border-b-4 border-r-4 border-black bg-[#fff7e8] p-1 font-mono text-base font-black last:border-r-0"
             key={`col-${index}`}
           >
             <span className="leading-tight">{clue.join(" ")}</span>
@@ -177,7 +183,7 @@ export function NonogramBoard({
         ))}
         {Array.from({ length: size }, (_, rowIndex) => (
           <Fragment key={`row-${rowIndex}`}>
-            <div className="flex min-h-12 items-center justify-end border-b-4 border-r-4 border-black bg-[#fff7e8] px-2 font-mono text-lg font-black">
+            <div className="flex min-h-11 items-center justify-end border-b-4 border-r-4 border-black bg-[#fff7e8] px-2 font-mono text-base font-black">
               {rowClues[rowIndex].join(" ")}
             </div>
             {Array.from({ length: size }, (_, colIndex) => {
@@ -185,7 +191,7 @@ export function NonogramBoard({
               return (
                 <button
                   aria-label={`Row ${rowIndex + 1}, column ${colIndex + 1}, ${mark}. ${mode} mode.`}
-                  className={`aspect-square min-h-12 border-b-4 border-r-4 border-black font-mono text-3xl font-black transition-colors ${
+                  className={`aspect-square min-h-11 border-b-4 border-r-4 border-black font-mono text-2xl font-black transition-colors ${
                     mark === "filled" ? "bg-black text-white" : "bg-white text-black"
                   }`}
                   disabled={disabled}

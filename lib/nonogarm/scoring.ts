@@ -23,6 +23,10 @@ export function getLevelProgress(score: number): LevelProgress {
   };
 }
 
+export function bankRoundScore(careerScore: number, roundScore: number): number {
+  return Math.max(0, careerScore) + Math.max(0, roundScore);
+}
+
 export function scorePatchSolve({ size, seconds, wrongSubmits }: PatchScoreInput): number {
   const raw = PATCH_BASE[size] - seconds * 3 - wrongSubmits * 75;
   return Math.max(MIN_PATCH_SCORE, raw);

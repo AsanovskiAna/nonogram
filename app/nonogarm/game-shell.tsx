@@ -13,6 +13,7 @@ import {
   undoLastMark,
   type RoundState,
 } from "@/lib/nonogarm/round.ts";
+import { bankRoundScore } from "@/lib/nonogarm/scoring.ts";
 import type { CellMark } from "@/lib/nonogarm/types.ts";
 import {
   GuessPanel,
@@ -36,6 +37,7 @@ function createInitialRound(): RoundState {
 
 export function GameShell() {
   const [actorIndex, setActorIndex] = useState(0);
+  const [careerScore, setCareerScore] = useState(0);
   const [round, setRound] = useState<RoundState>(createInitialRound);
   const [mode, setMode] = useState<PlayMode>("filled");
   const [guess, setGuess] = useState("");
@@ -54,6 +56,7 @@ export function GameShell() {
   }, [round.startedAt, round.status]);
 
   const activePatch = useMemo(() => getSelectedPatch(round), [round]);
+  const levelScore = careerScore + round.score;
 
   function handleSelectPatch(patchId: string) {
     setRound((current) => selectPatch(current, patchId, nowSeconds()));
@@ -79,6 +82,7 @@ export function GameShell() {
 
   function handleNewRound() {
     const nextIndex = (actorIndex + 1) % ACTORS.length;
+    setCareerScore((currentScore) => bankRoundScore(currentScore, round.score));
     setActorIndex(nextIndex);
     setRound(createRound(ACTORS[nextIndex], nowSeconds()));
     setGuess("");
@@ -95,7 +99,7 @@ export function GameShell() {
             <StatusRail
               difficulty={round.actor.difficulty}
               multiplier={round.actor.difficultyMultiplier}
-              score={round.score}
+              score={levelScore}
               status={round.status}
               streak={round.streak}
             />
