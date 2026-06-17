@@ -162,9 +162,14 @@
   }
   body {
     @apply bg-background text-foreground font-base;
+    min-width: 320px;
   }
   html {
     @apply font-sans;
+  }
+  button,
+  input {
+    font: inherit;
   }
   h1,
   h2,

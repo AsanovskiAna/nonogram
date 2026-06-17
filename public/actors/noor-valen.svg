@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="Fictional actor portrait Noor Valen">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="1" y2="0">
+      <stop offset="0" stop-color="#ccff24"/>
+      <stop offset=".55" stop-color="#fff8df"/>
+      <stop offset="1" stop-color="#31d6ef"/>
+    </linearGradient>
+    <clipPath id="face">
+      <path d="M188 270c0-106 62-182 136-182s136 76 136 182c0 118-62 198-136 198s-136-80-136-198z"/>
+    </clipPath>
+  </defs>
+  <rect width="640" height="640" fill="url(#bg)"/>
+  <path d="M96 632c29-112 112-176 228-176s199 64 228 176z" fill="#101010"/>
+  <path d="M152 248c-4-112 64-204 172-204s174 90 172 202c-48-58-102-86-172-86-72 0-126 30-172 88z" fill="#090909"/>
+  <path d="M188 270c0-106 62-182 136-182s136 76 136 182c0 118-62 198-136 198s-136-80-136-198z" fill="#c18b67"/>
+  <g clip-path="url(#face)">
+    <path d="M144 80c34 72 96 112 186 120 58 5 112-7 170-34V48H144z" fill="#0a0a0a"/>
+    <path d="M180 362c42 42 95 63 157 62 55-1 100-19 135-54v158H180z" fill="#90563f" opacity=".35"/>
+    <path d="M184 176c70-62 184-65 286-12-14-78-66-122-146-122-86 0-128 54-140 134z" fill="#090909"/>
+  </g>
+  <path d="M228 284c26-18 62-18 90 0" fill="none" stroke="#111" stroke-width="12" stroke-linecap="round"/>
+  <path d="M338 284c28-18 64-18 90 0" fill="none" stroke="#111" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="278" cy="322" rx="14" ry="16" fill="#111"/>
+  <ellipse cx="388" cy="322" rx="14" ry="16" fill="#111"/>
+  <path d="M326 318c-7 40-18 68-2 78 12 8 29 2 43-6" fill="none" stroke="#78452f" stroke-width="10" stroke-linecap="round"/>
+  <path d="M276 422c38 28 86 28 124 0" fill="none" stroke="#5a1b23" stroke-width="13" stroke-linecap="round"/>
+  <path d="M168 260c-32 21-34 72-8 104 17 20 42 17 54-5" fill="#c18b67"/>
+  <path d="M472 260c32 21 34 72 8 104-17 20-42 17-54-5" fill="#c18b67"/>
+  <path d="M186 78c42-52 111-72 180-51 72 22 111 88 118 164-94-70-215-71-332 1 2-45 12-82 34-114z" fill="#090909"/>
+  <path d="M73 83h494v494H73z" fill="none" stroke="#000" stroke-width="12"/>
+</svg>

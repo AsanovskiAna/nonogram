@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="Fictional actor portrait Milo Voss">
+  <defs>
+    <radialGradient id="bg" cx=".5" cy=".3" r=".8">
+      <stop offset="0" stop-color="#ffdf1b"/>
+      <stop offset="1" stop-color="#ff4a9a"/>
+    </radialGradient>
+    <clipPath id="head">
+      <path d="M182 278c0-120 66-190 142-190s142 70 142 190c0 112-64 192-142 192s-142-80-142-192z"/>
+    </clipPath>
+  </defs>
+  <rect width="640" height="640" fill="url(#bg)"/>
+  <path d="M98 632c24-118 112-184 226-184s202 66 226 184z" fill="#141414"/>
+  <path d="M162 216c6-102 72-172 162-172s154 64 166 162c-82-48-215-50-328 10z" fill="#27110b"/>
+  <path d="M182 278c0-120 66-190 142-190s142 70 142 190c0 112-64 192-142 192s-142-80-142-192z" fill="#9f684c"/>
+  <g clip-path="url(#head)">
+    <path d="M140 92c42 80 126 124 236 132 54 4 91-2 126-16V56H140z" fill="#2b130d"/>
+    <path d="M166 378c82 38 178 42 314-18v166H166z" fill="#7a4432" opacity=".42"/>
+    <path d="M178 188c84-30 190-42 296 14-10-82-58-150-150-150-74 0-126 42-146 136z" fill="#1e0d09"/>
+  </g>
+  <path d="M224 290c24-13 58-11 84 4" fill="none" stroke="#130b08" stroke-width="12" stroke-linecap="round"/>
+  <path d="M350 294c26-15 60-17 84-4" fill="none" stroke="#130b08" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="268" cy="328" rx="13" ry="15" fill="#121212"/>
+  <ellipse cx="392" cy="328" rx="13" ry="15" fill="#121212"/>
+  <path d="M324 324c-12 38-24 66-6 76 13 7 31 1 44-8" fill="none" stroke="#653224" stroke-width="10" stroke-linecap="round"/>
+  <path d="M280 424c34 18 80 17 112-4" fill="none" stroke="#2b1012" stroke-width="13" stroke-linecap="round"/>
+  <path d="M166 266c-34 20-38 72-12 104 18 22 42 18 56-3" fill="#9f684c"/>
+  <path d="M478 266c34 20 38 72 12 104-18 22-42 18-56-3" fill="#9f684c"/>
+  <path d="M204 88c64-76 186-72 244 10 28 39 34 77 32 114-101-54-212-63-332-7 8-48 24-85 56-117z" fill="#2b130d"/>
+  <path d="M73 83h494v494H73z" fill="none" stroke="#000" stroke-width="12"/>
+</svg>

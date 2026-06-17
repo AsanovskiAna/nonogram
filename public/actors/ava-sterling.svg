@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="Fictional actor portrait Ava Sterling">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#29d5f2"/>
+      <stop offset="1" stop-color="#fff2d3"/>
+    </linearGradient>
+    <clipPath id="faceClip">
+      <path d="M194 268c0-96 58-166 130-166s130 70 130 166c0 116-58 192-130 192s-130-76-130-192z"/>
+    </clipPath>
+  </defs>
+  <rect width="640" height="640" fill="url(#bg)"/>
+  <path d="M118 626c26-108 102-170 206-170s180 62 206 170z" fill="#101010"/>
+  <path d="M156 276c-8-122 58-216 170-216 96 0 158 68 158 170 0 44-8 74-24 114-17-78-60-134-136-134-78 0-125 44-168 66z" fill="#111"/>
+  <path d="M194 268c0-96 58-166 130-166s130 70 130 166c0 116-58 192-130 192s-130-76-130-192z" fill="#d79a6f"/>
+  <g clip-path="url(#faceClip)">
+    <path d="M172 132c56 86 160 114 308 106V78H172z" fill="#171717"/>
+    <path d="M184 334c52 35 106 53 162 52 54-1 96-18 126-51v178H184z" fill="#be7c57" opacity=".38"/>
+    <path d="M190 250c44-44 84-72 158-64 68 7 96 34 122 74v-178H190z" fill="#0f0f0f" opacity=".94"/>
+  </g>
+  <path d="M238 288c24-18 56-18 78 0" fill="none" stroke="#111" stroke-width="11" stroke-linecap="round"/>
+  <path d="M340 288c24-18 56-18 78 0" fill="none" stroke="#111" stroke-width="11" stroke-linecap="round"/>
+  <ellipse cx="278" cy="320" rx="14" ry="16" fill="#171717"/>
+  <ellipse cx="382" cy="320" rx="14" ry="16" fill="#171717"/>
+  <path d="M324 316c-8 34-18 58-6 70 9 9 26 5 38 0" fill="none" stroke="#8b4c37" stroke-width="10" stroke-linecap="round"/>
+  <path d="M278 414c34 22 78 22 110 0" fill="none" stroke="#661f28" stroke-width="13" stroke-linecap="round"/>
+  <path d="M156 252c-34 22-36 72-10 104 17 20 42 17 54-4" fill="#d79a6f"/>
+  <path d="M484 252c34 22 36 72 10 104-17 20-42 17-54-4" fill="#d79a6f"/>
+  <path d="M202 110c38-58 130-91 204-58 44 19 76 60 91 118-88-38-185-38-295-60z" fill="#0c0c0c"/>
+  <path d="M73 83h494v494H73z" fill="none" stroke="#000" stroke-width="12"/>
+</svg>
