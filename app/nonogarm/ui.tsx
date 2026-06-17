@@ -14,7 +14,11 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { getBoardFrame, getColumnClueLines } from "@/lib/nonogarm/layout.ts";
+import {
+  getBoardFrame,
+  getBoardGridTemplate,
+  getColumnClueLines,
+} from "@/lib/nonogarm/layout.ts";
 import { getClues } from "@/lib/nonogarm/puzzle.ts";
 import { getLevelProgress } from "@/lib/nonogarm/scoring.ts";
 import type { RoundStatus } from "@/lib/nonogarm/round.ts";
@@ -173,7 +177,7 @@ export function NonogramBoard({
       <div
         className="grid overflow-hidden border-4 border-black bg-black"
         style={{
-          gridTemplateColumns: `minmax(3.75rem, 4.75rem) repeat(${size}, minmax(0, 1fr))`,
+          gridTemplateColumns: getBoardGridTemplate(size),
         }}
       >
         <div className="border-b-4 border-r-4 border-black bg-[#fff7e8]" />
@@ -192,7 +196,10 @@ export function NonogramBoard({
         ))}
         {Array.from({ length: size }, (_, rowIndex) => (
           <Fragment key={`row-${rowIndex}`}>
-            <div className="flex min-h-11 items-center justify-end border-b-4 border-r-4 border-black bg-[#fff7e8] px-2 font-mono text-base font-black">
+            <div
+              className="flex min-h-11 items-center justify-end whitespace-nowrap border-b-4 border-r-4 border-black bg-[#fff7e8] px-2 font-mono text-base font-black"
+              data-row-clue={rowIndex}
+            >
               {rowClues[rowIndex].join(" ")}
             </div>
             {Array.from({ length: size }, (_, colIndex) => {

@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { ACTORS } from "../lib/nonogarm/actors.ts";
-import { getBoardFrame, getColumnClueLines } from "../lib/nonogarm/layout.ts";
+import {
+  getBoardFrame,
+  getBoardGridTemplate,
+  getColumnClueLines,
+} from "../lib/nonogarm/layout.ts";
 import { getClues, getPatchSize, isSolved } from "../lib/nonogarm/puzzle.ts";
 import {
   clearActivePatch,
@@ -144,6 +148,11 @@ test("getBoardFrame gives 8x8 puzzles a larger width and height than 5x5 puzzles
 test("getColumnClueLines keeps top clues stacked in order", () => {
   assert.deepEqual(getColumnClueLines([1, 2, 1]), ["1", "2", "1"]);
   assert.deepEqual(getColumnClueLines([0]), ["0"]);
+});
+
+test("getBoardGridTemplate lets row clues expand without wrapping", () => {
+  assert.equal(getBoardGridTemplate(5), "max-content repeat(5, minmax(0, 1fr))");
+  assert.equal(getBoardGridTemplate(8), "max-content repeat(8, minmax(0, 1fr))");
 });
 
 test("round state supports selecting, marking, undoing, clearing, and solving a patch", () => {

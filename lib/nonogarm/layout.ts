@@ -12,6 +12,10 @@ export function getBoardFrame(size: 5 | 8): BoardFrame {
   return BOARD_FRAMES[size];
 }
 
+export function getBoardGridTemplate(size: 5 | 8): string {
+  return `max-content repeat(${size}, minmax(0, 1fr))`;
+}
+
 export function getColumnClueLines(clue: number[]): string[] {
   return clue.map((value) => value.toString());
 }
