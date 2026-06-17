@@ -149,6 +149,16 @@ test("round state supports selecting, marking, undoing, clearing, and solving a 
   assert.ok(result.patchScore >= 50);
 });
 
+test("selecting a patch creates a status message", () => {
+  const round = createRound(ACTORS[0], 0);
+  const patch = ACTORS[0].patches[0];
+
+  const selected = selectPatch(round, patch.id, 0);
+
+  assert.equal(selected.selectedPatchId, patch.id);
+  assert.equal(selected.guessFeedback, "Patch 1-1 selected.");
+});
+
 test("round state resets streak after a wrong patch check or actor guess", () => {
   let round = createRound(ACTORS[0], 0);
   const patches = ACTORS[0].patches.filter((candidate) => candidate.size === 5);

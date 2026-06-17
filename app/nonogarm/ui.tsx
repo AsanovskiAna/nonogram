@@ -347,7 +347,6 @@ export function PortraitReveal({
 
 type GuessPanelProps = {
   disabled: boolean;
-  feedback: string;
   guess: string;
   status: RoundStatus;
   onGuessChange: (value: string) => void;
@@ -357,7 +356,6 @@ type GuessPanelProps = {
 
 export function GuessPanel({
   disabled,
-  feedback,
   guess,
   status,
   onGuessChange,
@@ -367,7 +365,7 @@ export function GuessPanel({
   return (
     <section className="flex flex-col gap-3">
       <form
-        className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_150px] xl:grid-cols-[minmax(0,1fr)_170px]"
+        className="grid min-w-0 gap-3"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit();
@@ -381,29 +379,27 @@ export function GuessPanel({
           placeholder="WHO IS IT?"
           value={guess}
         />
-        <button
-          className={`${buttonClass} min-w-0 bg-[#ff3f9a] text-2xl`}
-          disabled={disabled}
-          type="submit"
-        >
-          Guess
-        </button>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            className={`${buttonClass} min-w-0 bg-[#ff3f9a] text-2xl`}
+            disabled={disabled}
+            type="submit"
+          >
+            Guess
+          </button>
+          <button className={`${buttonClass} bg-[#caff24]`} onClick={onNewRound} type="button">
+            <RotateCcw className="size-6 stroke-[3]" aria-hidden="true" />
+            {status === "won" ? "Next" : "Skip"}
+          </button>
+        </div>
       </form>
-      <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_150px] xl:grid-cols-[minmax(0,1fr)_170px]">
-        <p className="min-h-14 min-w-0 border-4 border-black bg-white px-4 py-3 font-mono font-black shadow-[5px_5px_0_#000]">
-          {feedback || "Solve a patch or take a shot."}
-        </p>
-        <button className={`${buttonClass} bg-[#caff24]`} onClick={onNewRound} type="button">
-          <RotateCcw className="size-6 stroke-[3]" aria-hidden="true" />
-          {status === "won" ? "Next" : "Skip"}
-        </button>
-      </div>
     </section>
   );
 }
 
 type ScoreHudProps = {
   elapsedSeconds: number;
+  feedback: string;
   revealedCount: number;
   score: number;
   totalPatches: number;
@@ -411,6 +407,7 @@ type ScoreHudProps = {
 
 export function ScoreHud({
   elapsedSeconds,
+  feedback,
   revealedCount,
   score,
   totalPatches,
@@ -446,6 +443,9 @@ export function ScoreHud({
           <Zap className="size-8 fill-black stroke-black" aria-hidden="true" />
         </div>
       </div>
+      <p className="min-h-14 border-4 border-black bg-white px-4 py-3 font-mono font-black shadow-[5px_5px_0_#000]">
+        {feedback || "Solve a patch or take a shot."}
+      </p>
     </section>
   );
 }

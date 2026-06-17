@@ -132,7 +132,6 @@ export function GameShell() {
             <div className="order-3 lg:order-2">
               <GuessPanel
                 disabled={round.status === "won"}
-                feedback={round.guessFeedback}
                 guess={guess}
                 status={round.status}
                 onGuessChange={setGuess}
@@ -143,6 +142,7 @@ export function GameShell() {
             <div className="order-1 lg:order-3">
               <ScoreHud
                 elapsedSeconds={elapsedSeconds}
+                feedback={round.guessFeedback}
                 revealedCount={round.revealedPatchIds.length}
                 score={round.score}
                 totalPatches={round.actor.patches.length}
