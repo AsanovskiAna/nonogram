@@ -1,9 +1,18 @@
+"use client";
+
 import {
-  Puzzle,
-  Settings,
-  Star,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
+import {
+  CircleUserRound,
+  LogIn,
   Trophy,
+  UserPlus,
 } from "lucide-react";
+import Link from "next/link";
+import { getPlayerRailActions, type PlayerRailAction } from "@/lib/nonogarm/navigation.ts";
 import { getLevelProgress } from "@/lib/nonogarm/scoring.ts";
 import type { RoundStatus } from "@/lib/nonogarm/round.ts";
 import type { Difficulty } from "@/lib/nonogarm/types.ts";
@@ -11,36 +20,105 @@ import { difficultyColor, panelClass } from "./shared";
 
 type StatusRailProps = {
   difficulty: Difficulty;
+  isSignedIn: boolean;
   multiplier: number;
   score: number;
   status: RoundStatus;
   streak: number;
 };
 
-export function StatusRail({ difficulty, multiplier, score, status, streak }: StatusRailProps) {
+function actionClassName(color: string): string {
+  return `flex w-full items-center justify-between border-b-4 border-black px-4 py-3 text-left font-mono font-black uppercase last:border-b-0 ${color}`;
+}
+
+function ActionIcon({ kind }: { kind: PlayerRailAction["kind"] }) {
+  const iconClassName = "size-8 shrink-0 stroke-[3]";
+
+  if (kind === "sign-in") {
+    return <LogIn className={iconClassName} aria-hidden="true" />;
+  }
+
+  if (kind === "sign-up") {
+    return <UserPlus className={iconClassName} aria-hidden="true" />;
+  }
+
+  if (kind === "account") {
+    return <CircleUserRound className={iconClassName} aria-hidden="true" />;
+  }
+
+  return <Trophy className={iconClassName} aria-hidden="true" />;
+}
+
+function ActionLabel({ action }: { action: PlayerRailAction }) {
+  return (
+    <span className="flex min-w-0 items-center gap-3">
+      <ActionIcon kind={action.kind} />
+      <span className="truncate">{action.label}</span>
+    </span>
+  );
+}
+
+function RailAction({ action }: { action: PlayerRailAction }) {
+  if (action.kind === "sign-in") {
+    return (
+      <SignInButton>
+        <button className={actionClassName(action.color)} type="button">
+          <ActionLabel action={action} />
+          <span aria-hidden="true">&gt;</span>
+        </button>
+      </SignInButton>
+    );
+  }
+
+  if (action.kind === "sign-up") {
+    return (
+      <SignUpButton>
+        <button className={actionClassName(action.color)} type="button">
+          <ActionLabel action={action} />
+          <span aria-hidden="true">&gt;</span>
+        </button>
+      </SignUpButton>
+    );
+  }
+
+  if (action.kind === "account") {
+    return (
+      <div className={actionClassName(action.color)}>
+        <ActionLabel action={action} />
+        <UserButton />
+      </div>
+    );
+  }
+
+  if (action.kind === "link") {
+    return (
+      <Link className={actionClassName(action.color)} href={action.href}>
+        <ActionLabel action={action} />
+        <span aria-hidden="true">&gt;</span>
+      </Link>
+    );
+  }
+
+  return null;
+}
+
+export function StatusRail({
+  difficulty,
+  isSignedIn,
+  multiplier,
+  score,
+  status,
+  streak,
+}: StatusRailProps) {
   const levelProgress = getLevelProgress(score);
   const levelLabel = levelProgress.level.toString().padStart(2, "0");
-  const items = [
-    { icon: Puzzle, label: "Puzzle", color: "bg-[#39d4ee]" },
-    { icon: Trophy, label: "Scores", color: "bg-white" },
-    { icon: Star, label: "Stats", color: "bg-[#caff24]" },
-    { icon: Settings, label: "Settings", color: "bg-white" },
-  ];
+  const actions = getPlayerRailActions(isSignedIn);
 
   return (
     <aside className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
       <div className={`${panelClass} overflow-hidden sm:col-span-2 lg:col-span-1`}>
-        {items.map(({ icon: Icon, label, color }) => (
-          <div
-            className={`flex items-center justify-between border-b-4 border-black px-4 py-3 font-mono font-black uppercase last:border-b-0 ${color}`}
-            key={label}
-          >
-            <span className="flex items-center gap-3">
-              <Icon className="size-8 stroke-[3]" aria-hidden="true" />
-              {label}
-            </span>
-            <span aria-hidden="true">&gt;</span>
-          </div>
+        {actions.map((action) => (
+          <RailAction action={action} key={action.kind} />
         ))}
       </div>
       <div className={`${panelClass} flex flex-col items-center justify-center gap-2 p-4 text-center`}>

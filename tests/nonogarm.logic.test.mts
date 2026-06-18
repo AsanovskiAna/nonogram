@@ -27,6 +27,17 @@ import {
   scorePatchSolve,
 } from "../lib/nonogarm/scoring.ts";
 import { isActorMatch, normalizeGuess } from "../lib/nonogarm/matching.ts";
+import { getPlayerRailActions } from "../lib/nonogarm/navigation.ts";
+import {
+  getLeaderboardEntries,
+  mergeLeaderboardMetadata,
+  type LeaderboardUser,
+} from "../lib/nonogarm/leaderboard.ts";
+import {
+  getNextPlayableActor,
+  mergeGameProgressMetadata,
+  readGameProgressMetadata,
+} from "../lib/nonogarm/progress.ts";
 import type { ActorPatch } from "../lib/nonogarm/types.ts";
 
 function serializePatchSolutions(patches: ActorPatch[]): string[] {
@@ -326,4 +337,233 @@ test("new rounds can preserve a correct-guess streak", () => {
 
   assert.equal(right.round.streak, 3);
   assert.equal(nextRound.streak, 3);
+});
+
+test("mergeLeaderboardMetadata records the best run while counting every win", () => {
+  const first = mergeLeaderboardMetadata(
+    undefined,
+    {
+      actorName: "Ava Sterling",
+      elapsedSeconds: 52,
+      score: 2400,
+      streak: 2,
+    },
+    "2026-06-18T10:00:00.000Z",
+  );
+
+  assert.deepEqual(first, {
+    bestActor: "Ava Sterling",
+    bestScore: 2400,
+    bestSeconds: 52,
+    bestStreak: 2,
+    updatedAt: "2026-06-18T10:00:00.000Z",
+    wins: 1,
+  });
+
+  const lowerScore = mergeLeaderboardMetadata(
+    first,
+    {
+      actorName: "Noor Valen",
+      elapsedSeconds: 32,
+      score: 1800,
+      streak: 4,
+    },
+    "2026-06-18T10:04:00.000Z",
+  );
+
+  assert.deepEqual(lowerScore, {
+    ...first,
+    updatedAt: "2026-06-18T10:04:00.000Z",
+    wins: 2,
+  });
+
+  const betterScore = mergeLeaderboardMetadata(
+    lowerScore,
+    {
+      actorName: "Milo Voss",
+      elapsedSeconds: 41,
+      score: 2600,
+      streak: 5,
+    },
+    "2026-06-18T10:08:00.000Z",
+  );
+
+  assert.deepEqual(betterScore, {
+    bestActor: "Milo Voss",
+    bestScore: 2600,
+    bestSeconds: 41,
+    bestStreak: 5,
+    updatedAt: "2026-06-18T10:08:00.000Z",
+    wins: 3,
+  });
+});
+
+test("getLeaderboardEntries ranks Clerk users by valid leaderboard metadata", () => {
+  const users: LeaderboardUser[] = [
+    {
+      firstName: "Milo",
+      id: "user_1",
+      imageUrl: "https://example.com/milo.png",
+      lastName: "Voss",
+      publicMetadata: {
+        nonogarmLeaderboard: {
+          bestActor: "Ava Sterling",
+          bestScore: 2000,
+          bestSeconds: 35,
+          bestStreak: 2,
+          updatedAt: "2026-06-18T10:00:00.000Z",
+          wins: 1,
+        },
+      },
+      username: null,
+    },
+    {
+      firstName: null,
+      id: "user_2",
+      imageUrl: "https://example.com/noor.png",
+      lastName: null,
+      publicMetadata: {
+        nonogarmLeaderboard: {
+          bestActor: "Noor Valen",
+          bestScore: 2800,
+          bestSeconds: 48,
+          bestStreak: 4,
+          updatedAt: "2026-06-18T10:02:00.000Z",
+          wins: 2,
+        },
+      },
+      username: "noor",
+    },
+    {
+      firstName: "Invalid",
+      id: "user_3",
+      imageUrl: "",
+      lastName: "Metadata",
+      publicMetadata: {
+        nonogarmLeaderboard: {
+          bestScore: "2800",
+        },
+      },
+      username: null,
+    },
+  ];
+
+  assert.deepEqual(getLeaderboardEntries(users, 10), [
+    {
+      bestActor: "Noor Valen",
+      bestScore: 2800,
+      bestSeconds: 48,
+      bestStreak: 4,
+      imageUrl: "https://example.com/noor.png",
+      playerName: "noor",
+      rank: 1,
+      updatedAt: "2026-06-18T10:02:00.000Z",
+      userId: "user_2",
+      wins: 2,
+    },
+    {
+      bestActor: "Ava Sterling",
+      bestScore: 2000,
+      bestSeconds: 35,
+      bestStreak: 2,
+      imageUrl: "https://example.com/milo.png",
+      playerName: "Milo Voss",
+      rank: 2,
+      updatedAt: "2026-06-18T10:00:00.000Z",
+      userId: "user_1",
+      wins: 1,
+    },
+  ]);
+});
+
+test("getPlayerRailActions exposes auth actions signed out and leaderboard signed in", () => {
+  assert.deepEqual(getPlayerRailActions(false), [
+    { color: "bg-[#caff24]", kind: "sign-in", label: "Sign in" },
+    { color: "bg-[#ff3f9a]", kind: "sign-up", label: "Sign up" },
+  ]);
+
+  assert.deepEqual(getPlayerRailActions(true), [
+    {
+      color: "bg-[#39d4ee]",
+      href: "/leaderboard",
+      kind: "link",
+      label: "Leaderboard",
+    },
+    { color: "bg-white", kind: "account", label: "Account" },
+  ]);
+});
+
+test("mergeGameProgressMetadata stores best score, streak, and completed actors", () => {
+  const first = mergeGameProgressMetadata(
+    undefined,
+    {
+      actorId: "ava-sterling",
+      careerScore: 1400,
+      streak: 3,
+    },
+    "2026-06-18T11:00:00.000Z",
+  );
+
+  assert.deepEqual(first, {
+    careerScore: 1400,
+    completedActorIds: ["ava-sterling"],
+    streak: 3,
+    updatedAt: "2026-06-18T11:00:00.000Z",
+  });
+
+  const merged = mergeGameProgressMetadata(
+    first,
+    {
+      actorId: "milo-voss",
+      careerScore: 900,
+      streak: 1,
+    },
+    "2026-06-18T11:04:00.000Z",
+  );
+
+  assert.deepEqual(merged, {
+    careerScore: 1400,
+    completedActorIds: ["ava-sterling", "milo-voss"],
+    streak: 1,
+    updatedAt: "2026-06-18T11:04:00.000Z",
+  });
+});
+
+test("readGameProgressMetadata sanitizes invalid Clerk metadata", () => {
+  assert.equal(readGameProgressMetadata(null), null);
+  assert.equal(readGameProgressMetadata({ careerScore: "a lot" }), null);
+
+  assert.deepEqual(
+    readGameProgressMetadata({
+      careerScore: 600.4,
+      completedActorIds: ["ava-sterling", "", "ava-sterling", 42],
+      streak: 2.6,
+      updatedAt: "2026-06-18T11:08:00.000Z",
+    }),
+    {
+      careerScore: 600,
+      completedActorIds: ["ava-sterling"],
+      streak: 3,
+      updatedAt: "2026-06-18T11:08:00.000Z",
+    },
+  );
+});
+
+test("getNextPlayableActor skips completed actors and stops when all are finished", () => {
+  assert.equal(
+    getNextPlayableActor(ACTORS, "ava-sterling", ["ava-sterling"])?.id,
+    "milo-voss",
+  );
+  assert.equal(
+    getNextPlayableActor(ACTORS, "milo-voss", ["ava-sterling", "milo-voss"])?.id,
+    "noor-valen",
+  );
+  assert.equal(
+    getNextPlayableActor(
+      ACTORS,
+      "noor-valen",
+      ACTORS.map((actor) => actor.id),
+    ),
+    null,
+  );
 });
