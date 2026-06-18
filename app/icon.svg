@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Nonogarm app icon">
+  <rect x="20" y="22" width="88" height="88" fill="#000"/>
+  <rect x="10" y="12" width="88" height="88" fill="#ff3f9a" stroke="#000" stroke-width="8"/>
+  <rect x="20" y="22" width="68" height="68" fill="#ffd60a"/>
+  <path d="M35 84c4-22 18-34 36-34s32 12 36 34z" fill="#111"/>
+  <circle cx="71" cy="46" r="24" fill="#d79a6f" stroke="#000" stroke-width="5"/>
+  <path d="M47 39c10-19 35-20 47-2-16-7-31-7-47 2z" fill="#111"/>
+  <circle cx="62" cy="48" r="3.5" fill="#000"/>
+  <circle cx="80" cy="48" r="3.5" fill="#000"/>
+  <path d="M64 63c7 5 16 5 23 0" fill="none" stroke="#000" stroke-linecap="round" stroke-width="4"/>
+  <path d="M20 56h68M54 22v68" stroke="#000" stroke-width="6"/>
+  <rect x="20" y="22" width="34" height="34" fill="#39d4ee"/>
+  <path d="M29 31h16v16H29z" fill="#000"/>
+  <rect x="54" y="56" width="34" height="34" fill="#fff7e8"/>
+  <path d="M54 73h34M71 56v34" stroke="#000" stroke-width="5"/>
+  <rect x="54" y="56" width="17" height="17" fill="#caff24"/>
+  <rect x="71" y="73" width="17" height="17" fill="#000"/>
+</svg>

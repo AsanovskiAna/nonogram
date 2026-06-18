@@ -6,6 +6,7 @@ import {
   getBoardPuzzleMaxWidth,
   getColumnClueLines,
 } from "@/lib/nonogarm/layout.ts";
+import { getCellMarkClasses } from "@/lib/nonogarm/cell-style.ts";
 import { getClues } from "@/lib/nonogarm/puzzle.ts";
 import type {
   ActorPatch,
@@ -96,9 +97,7 @@ export function NonogramBoard({
                 return (
                   <button
                     aria-label={`Row ${rowIndex + 1}, column ${colIndex + 1}, ${mark}. ${mode} mode.`}
-                    className={`aspect-square min-h-11 border-b-4 border-r-4 border-black font-mono text-2xl font-black transition-colors ${
-                      mark === "filled" ? "bg-black text-white" : "bg-white text-black"
-                    }`}
+                    className={`aspect-square min-h-11 border-b-4 border-r-4 border-black font-mono text-2xl font-black transition-colors ${getCellMarkClasses(mark)}`}
                     disabled={disabled}
                     key={`${rowIndex}-${colIndex}`}
                     onClick={() => onCellClick(rowIndex, colIndex)}

@@ -39,6 +39,7 @@ import {
   mergeGameProgressMetadata,
   readGameProgressMetadata,
 } from "../lib/nonogarm/progress.ts";
+import { getCellMarkClasses } from "../lib/nonogarm/cell-style.ts";
 import type { ActorPatch } from "../lib/nonogarm/types.ts";
 
 function serializePatchSolutions(patches: ActorPatch[]): string[] {
@@ -297,6 +298,14 @@ test("getColumnClueLines keeps top clues stacked in order", () => {
 test("getBoardGridTemplate lets row clues expand without wrapping", () => {
   assert.equal(getBoardGridTemplate(5), "max-content repeat(5, minmax(0, 1fr))");
   assert.equal(getBoardGridTemplate(8), "max-content repeat(8, minmax(0, 1fr))");
+});
+
+test("filled cell styling keeps black fill visible with a white lower-right edge", () => {
+  const filledClasses = getCellMarkClasses("filled");
+
+  assert.match(filledClasses, /bg-black/);
+  assert.match(filledClasses, /text-white/);
+  assert.match(filledClasses, /shadow-\[inset_-4px_-4px_0_#fff\]/);
 });
 
 test("round state supports selecting, marking, undoing, clearing, and solving a patch", () => {
