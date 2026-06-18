@@ -4,8 +4,8 @@ export type BoardFrame = {
 };
 
 const BOARD_FRAMES: Record<5 | 8, BoardFrame> = {
-  5: { maxWidth: 500, minHeight: 540 },
-  8: { maxWidth: 650, minHeight: 680 },
+  5: { maxWidth: 580, minHeight: 600 },
+  8: { maxWidth: 580, minHeight: 600 },
 };
 
 export function getBoardFrame(size: 5 | 8): BoardFrame {

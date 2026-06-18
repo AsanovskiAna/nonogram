@@ -23,7 +23,7 @@ import {
   PuzzleControls,
   ScoreHud,
   StatusRail,
-} from "./ui";
+} from "./components";
 
 type PlayMode = Exclude<CellMark, "empty">;
 

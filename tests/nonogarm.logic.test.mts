@@ -19,6 +19,8 @@ import {
 import {
   bankRoundScore,
   getLevelProgress,
+  getSpeedBonus,
+  getSpeedFillPercent,
   scoreActorGuess,
   scorePatchSolve,
 } from "../lib/nonogarm/scoring.ts";
@@ -92,6 +94,15 @@ test("scoreActorGuess rewards difficulty, speed, and unrevealed patches", () => 
     }),
     3892,
   );
+});
+
+test("speed bonus fill drains as time increases", () => {
+  assert.equal(getSpeedBonus(0), 900);
+  assert.equal(getSpeedBonus(45), 540);
+  assert.equal(getSpeedBonus(200), 0);
+  assert.equal(getSpeedFillPercent(0), 100);
+  assert.equal(getSpeedFillPercent(45), 60);
+  assert.equal(getSpeedFillPercent(200), 0);
 });
 
 test("getLevelProgress starts at level zero and advances from score XP", () => {
