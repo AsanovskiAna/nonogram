@@ -4,6 +4,8 @@ import { ACTORS } from "../lib/nonogarm/actors.ts";
 import {
   getBoardFrame,
   getBoardGridTemplate,
+  getBoardPanelStyle,
+  getBoardPuzzleMaxWidth,
   getColumnClueLines,
 } from "../lib/nonogarm/layout.ts";
 import { getClues, getPatchSize, isSolved } from "../lib/nonogarm/puzzle.ts";
@@ -148,12 +150,32 @@ test("actor data includes three actors with sixteen correctly sized patches each
   }
 });
 
-test("getBoardFrame gives 8x8 puzzles a larger width and height than 5x5 puzzles", () => {
+test("getBoardFrame gives 5x5 and 8x8 puzzles the same frame", () => {
   const fiveFrame = getBoardFrame(5);
   const eightFrame = getBoardFrame(8);
 
-  assert.ok(eightFrame.maxWidth > fiveFrame.maxWidth);
-  assert.ok(eightFrame.minHeight > fiveFrame.minHeight);
+  assert.equal(fiveFrame.minHeight, 560);
+  assert.equal(eightFrame.maxWidth, fiveFrame.maxWidth);
+  assert.equal(eightFrame.minHeight, fiveFrame.minHeight);
+});
+
+test("getBoardPanelStyle fixes every puzzle state to the shared frame height", () => {
+  for (const size of [5, 8] as const) {
+    const frame = getBoardFrame(size);
+
+    assert.deepEqual(getBoardPanelStyle(size), {
+      height: frame.minHeight,
+      maxWidth: frame.maxWidth,
+      minHeight: frame.minHeight,
+    });
+  }
+});
+
+test("getBoardPuzzleMaxWidth pads smaller grids inside the shared frame", () => {
+  assert.equal(getBoardPuzzleMaxWidth(5), 440);
+  assert.equal(getBoardPuzzleMaxWidth(8), 468);
+  assert.ok(getBoardPuzzleMaxWidth(5) < getBoardPuzzleMaxWidth(8));
+  assert.ok(getBoardPuzzleMaxWidth(8) < getBoardFrame(8).maxWidth);
 });
 
 test("getColumnClueLines keeps top clues stacked in order", () => {
