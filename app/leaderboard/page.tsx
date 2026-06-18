@@ -35,6 +35,8 @@ function PlayerAvatar({ entry }: { entry: LeaderboardEntry }) {
 }
 
 function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
+  const levelLabel = entry.level.toString().padStart(2, "0");
+
   return (
     <li className="grid min-w-0 gap-3 border-4 border-black bg-white p-3 font-mono font-black uppercase shadow-[6px_6px_0_#000] sm:grid-cols-[4rem_minmax(0,1fr)_auto] sm:items-center">
       <div className="flex items-center gap-3 sm:block">
@@ -53,19 +55,21 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
         <div className="min-w-0">
           <p className="truncate text-2xl leading-none">{entry.playerName}</p>
           <p className="mt-2 truncate text-sm text-black/65">
-            Best actor: {entry.bestActor}
+            Best guess: {entry.bestActor} - {formatTime(entry.bestSeconds)}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2 text-center sm:min-w-80">
         <div className="border-4 border-black bg-[#caff24] p-2">
-          <p className="text-xs">Score</p>
-          <p className="mt-1 text-xl leading-none">{entry.bestScore}</p>
+          <p className="text-xs">Level</p>
+          <p className="mt-1 text-xl leading-none">{levelLabel}</p>
         </div>
         <div className="border-4 border-black bg-[#ffd60a] p-2">
-          <p className="text-xs">Time</p>
-          <p className="mt-1 text-xl leading-none">{formatTime(entry.bestSeconds)}</p>
+          <p className="text-xs">XP</p>
+          <p className="mt-1 text-xl leading-none">
+            {entry.currentXp}/{entry.nextLevelXp}
+          </p>
         </div>
         <div className="border-4 border-black bg-[#ff8a00] p-2">
           <p className="text-xs">Wins</p>

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import test from "node:test";
 import { ACTORS } from "../lib/nonogarm/actors.ts";
 import {
@@ -177,11 +178,23 @@ test("getLevelProgress starts at level zero and advances from score XP", () => {
     nextLevelXp: 600,
     progressPercent: 100,
   });
+  assert.deepEqual(getLevelProgress(600), {
+    level: 1,
+    currentXp: 0,
+    nextLevelXp: 900,
+    progressPercent: 0,
+  });
   assert.deepEqual(getLevelProgress(1450), {
-    level: 2,
-    currentXp: 250,
-    nextLevelXp: 600,
-    progressPercent: 42,
+    level: 1,
+    currentXp: 850,
+    nextLevelXp: 900,
+    progressPercent: 94,
+  });
+  assert.deepEqual(getLevelProgress(2700), {
+    level: 3,
+    currentXp: 0,
+    nextLevelXp: 1500,
+    progressPercent: 0,
   });
 });
 
@@ -192,15 +205,49 @@ test("bankRoundScore carries level XP across actor rounds", () => {
   assert.deepEqual(getLevelProgress(careerScore), {
     level: 1,
     currentXp: 150,
-    nextLevelXp: 600,
-    progressPercent: 25,
+    nextLevelXp: 900,
+    progressPercent: 17,
   });
   assert.equal(bankRoundScore(careerScore, 0), 750);
 });
 
-test("actor catalog includes three actors and generated rounds include sized patches", () => {
-  assert.equal(ACTORS.length, 3);
+test("actor catalog includes 20 regional musicians with local portraits", () => {
+  assert.deepEqual(
+    ACTORS.map((actor) => actor.displayName),
+    [
+      "Marija Šerifović",
+      "Željko Joksimović",
+      "Konstrakta",
+      "Sanja Vučić",
+      "Đorđe Balašević",
+      "Dino Merlin",
+      "Goran Bregović",
+      "Zdravko Čolić",
+      "Amira Medunjanin",
+      "Haris Džinović",
+      "Sergej Ćetković",
+      "Rambo Amadeus",
+      "Knez",
+      "Andrea Demirović",
+      "Slavko Kalezić",
+      "Severina",
+      "Oliver Dragojević",
+      "Nina Badrić",
+      "Josipa Lisac",
+      "Tony Cetinski",
+    ],
+  );
+  assert.equal(new Set(ACTORS.map((actor) => actor.id)).size, ACTORS.length);
+
   for (const actor of ACTORS) {
+    assert.ok(actor.aliases.length >= 2, `${actor.displayName} should have guess aliases`);
+    assert.ok(actor.portrait.startsWith("/actors/"), `${actor.displayName} should use local portrait`);
+    assert.equal(
+      existsSync(new URL(`../public${actor.portrait}`, import.meta.url)),
+      true,
+      `${actor.displayName} portrait should exist`,
+    );
+
     const round = createRound(actor, 0, `catalog-${actor.id}`);
 
     assert.equal(round.actor.patches.length, 16);
@@ -398,7 +445,7 @@ test("mergeLeaderboardMetadata records the best run while counting every win", (
   });
 });
 
-test("getLeaderboardEntries ranks Clerk users by valid leaderboard metadata", () => {
+test("getLeaderboardEntries ranks Clerk users by career level before run score", () => {
   const users: LeaderboardUser[] = [
     {
       firstName: "Milo",
@@ -408,11 +455,17 @@ test("getLeaderboardEntries ranks Clerk users by valid leaderboard metadata", ()
       publicMetadata: {
         nonogarmLeaderboard: {
           bestActor: "Ava Sterling",
-          bestScore: 2000,
+          bestScore: 5000,
           bestSeconds: 35,
           bestStreak: 2,
           updatedAt: "2026-06-18T10:00:00.000Z",
           wins: 1,
+        },
+        nonogarmProgress: {
+          careerScore: 1000,
+          completedActorIds: ["marija-serifovic"],
+          streak: 1,
+          updatedAt: "2026-06-18T10:00:00.000Z",
         },
       },
       username: null,
@@ -431,6 +484,12 @@ test("getLeaderboardEntries ranks Clerk users by valid leaderboard metadata", ()
           updatedAt: "2026-06-18T10:02:00.000Z",
           wins: 2,
         },
+        nonogarmProgress: {
+          careerScore: 2800,
+          completedActorIds: ["marija-serifovic", "zeljko-joksimovic"],
+          streak: 4,
+          updatedAt: "2026-06-18T10:02:00.000Z",
+        },
       },
       username: "noor",
     },
@@ -446,6 +505,23 @@ test("getLeaderboardEntries ranks Clerk users by valid leaderboard metadata", ()
       },
       username: null,
     },
+    {
+      firstName: "Legacy",
+      id: "user_4",
+      imageUrl: "",
+      lastName: "Player",
+      publicMetadata: {
+        nonogarmLeaderboard: {
+          bestActor: "Konstrakta",
+          bestScore: 1500,
+          bestSeconds: 28,
+          bestStreak: 1,
+          updatedAt: "2026-06-18T10:04:00.000Z",
+          wins: 1,
+        },
+      },
+      username: null,
+    },
   ];
 
   assert.deepEqual(getLeaderboardEntries(users, 10), [
@@ -454,21 +530,48 @@ test("getLeaderboardEntries ranks Clerk users by valid leaderboard metadata", ()
       bestScore: 2800,
       bestSeconds: 48,
       bestStreak: 4,
+      currentXp: 100,
       imageUrl: "https://example.com/noor.png",
+      leaderboardXp: 2800,
+      level: 3,
+      nextLevelXp: 1500,
       playerName: "noor",
+      progressPercent: 7,
       rank: 1,
       updatedAt: "2026-06-18T10:02:00.000Z",
       userId: "user_2",
       wins: 2,
     },
     {
+      bestActor: "Konstrakta",
+      bestScore: 1500,
+      bestSeconds: 28,
+      bestStreak: 1,
+      currentXp: 0,
+      imageUrl: "",
+      leaderboardXp: 1500,
+      level: 2,
+      nextLevelXp: 1200,
+      playerName: "Legacy Player",
+      progressPercent: 0,
+      rank: 2,
+      updatedAt: "2026-06-18T10:04:00.000Z",
+      userId: "user_4",
+      wins: 1,
+    },
+    {
       bestActor: "Ava Sterling",
-      bestScore: 2000,
+      bestScore: 5000,
       bestSeconds: 35,
       bestStreak: 2,
+      currentXp: 400,
       imageUrl: "https://example.com/milo.png",
+      leaderboardXp: 1000,
+      level: 1,
+      nextLevelXp: 900,
       playerName: "Milo Voss",
-      rank: 2,
+      progressPercent: 44,
+      rank: 3,
       updatedAt: "2026-06-18T10:00:00.000Z",
       userId: "user_1",
       wins: 1,
@@ -551,17 +654,20 @@ test("readGameProgressMetadata sanitizes invalid Clerk metadata", () => {
 
 test("getNextPlayableActor skips completed actors and stops when all are finished", () => {
   assert.equal(
-    getNextPlayableActor(ACTORS, "ava-sterling", ["ava-sterling"])?.id,
-    "milo-voss",
+    getNextPlayableActor(ACTORS, "marija-serifovic", ["marija-serifovic"])?.id,
+    "zeljko-joksimovic",
   );
   assert.equal(
-    getNextPlayableActor(ACTORS, "milo-voss", ["ava-sterling", "milo-voss"])?.id,
-    "noor-valen",
+    getNextPlayableActor(ACTORS, "zeljko-joksimovic", [
+      "marija-serifovic",
+      "zeljko-joksimovic",
+    ])?.id,
+    "konstrakta",
   );
   assert.equal(
     getNextPlayableActor(
       ACTORS,
-      "noor-valen",
+      "tony-cetinski",
       ACTORS.map((actor) => actor.id),
     ),
     null,

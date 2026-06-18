@@ -2,7 +2,8 @@ import type { ActorScoreInput, PatchScoreInput } from "./types.ts";
 
 const PATCH_BASE: Record<5 | 8, number> = { 5: 250, 8: 650 };
 const MIN_PATCH_SCORE = 50;
-const LEVEL_XP = 600;
+const BASE_LEVEL_XP = 600;
+const LEVEL_XP_STEP = 300;
 const MAX_SPEED_BONUS = 900;
 const SPEED_PENALTY_PER_SECOND = 8;
 
@@ -13,15 +14,26 @@ export type LevelProgress = {
   progressPercent: number;
 };
 
+function getLevelXpRequirement(level: number): number {
+  return BASE_LEVEL_XP + Math.max(0, level) * LEVEL_XP_STEP;
+}
+
 export function getLevelProgress(score: number): LevelProgress {
-  const safeScore = Math.max(0, score);
-  const currentXp = safeScore % LEVEL_XP;
+  let remainingXp = Math.max(0, Math.round(score));
+  let level = 0;
+  let nextLevelXp = getLevelXpRequirement(level);
+
+  while (remainingXp >= nextLevelXp) {
+    remainingXp -= nextLevelXp;
+    level += 1;
+    nextLevelXp = getLevelXpRequirement(level);
+  }
 
   return {
-    level: Math.floor(safeScore / LEVEL_XP),
-    currentXp,
-    nextLevelXp: LEVEL_XP,
-    progressPercent: Math.round((currentXp / LEVEL_XP) * 100),
+    level,
+    currentXp: remainingXp,
+    nextLevelXp,
+    progressPercent: Math.round((remainingXp / nextLevelXp) * 100),
   };
 }
 

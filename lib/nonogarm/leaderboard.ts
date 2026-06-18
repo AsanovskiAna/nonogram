@@ -1,3 +1,9 @@
+import {
+  PROGRESS_METADATA_KEY,
+  readGameProgressMetadata,
+} from "./progress.ts";
+import { getLevelProgress } from "./scoring.ts";
+
 export type LeaderboardSubmission = {
   actorName: string;
   elapsedSeconds: number;
@@ -24,8 +30,13 @@ export type LeaderboardUser = {
 };
 
 export type LeaderboardEntry = LeaderboardMetadata & {
+  currentXp: number;
   imageUrl: string;
+  leaderboardXp: number;
+  level: number;
+  nextLevelXp: number;
   playerName: string;
+  progressPercent: number;
   rank: number;
   userId: string;
 };
@@ -136,19 +147,32 @@ export function getLeaderboardEntries(
         return [];
       }
 
+      const progress = readGameProgressMetadata(user.publicMetadata[PROGRESS_METADATA_KEY]);
+      const leaderboardXp = progress?.careerScore ?? metadata.bestScore;
+      const levelProgress = getLevelProgress(leaderboardXp);
+
       return [
         {
           ...metadata,
+          currentXp: levelProgress.currentXp,
           imageUrl: user.imageUrl,
+          leaderboardXp,
+          level: levelProgress.level,
+          nextLevelXp: levelProgress.nextLevelXp,
           playerName: getPlayerName(user),
+          progressPercent: levelProgress.progressPercent,
           rank: 0,
           userId: user.id,
         },
       ];
     })
     .toSorted((left, right) => {
-      if (left.bestScore !== right.bestScore) {
-        return right.bestScore - left.bestScore;
+      if (left.level !== right.level) {
+        return right.level - left.level;
+      }
+
+      if (left.leaderboardXp !== right.leaderboardXp) {
+        return right.leaderboardXp - left.leaderboardXp;
       }
 
       if (left.bestSeconds !== right.bestSeconds) {
