@@ -51,7 +51,7 @@ export function getSpeedBonus(seconds: number): number {
 }
 
 export function getSpeedFillPercent(seconds: number): number {
-  return Math.round((getSpeedBonus(seconds) / MAX_SPEED_BONUS) * 100);
+  return (getSpeedBonus(seconds) / MAX_SPEED_BONUS) * 100;
 }
 
 export function scoreActorGuess({

@@ -26,6 +26,8 @@ export function ScoreHud({
   const hiddenCount = totalPatches - revealedCount;
   const speedBonus = getSpeedBonus(elapsedSeconds);
   const speedFillPercent = getSpeedFillPercent(elapsedSeconds);
+  const speedFillLabel = Math.round(speedFillPercent);
+  const speedFillScale = speedFillPercent / 100;
   const tiles = [
     { label: "Score", value: score.toString(), color: "bg-[#39d4ee]" },
     { label: "Time", value: formatTime(elapsedSeconds), color: "bg-[#caff24]" },
@@ -47,15 +49,15 @@ export function ScoreHud({
       </div>
       <div className="grid grid-cols-[1fr_130px] overflow-hidden border-4 border-black font-mono font-black uppercase shadow-[6px_6px_0_#000]">
         <div
-          aria-label={`Speed bonus ${speedBonus}, ${speedFillPercent}% remaining`}
+          aria-label={`Speed bonus ${speedBonus}, ${speedFillLabel}% remaining`}
           className="relative isolate overflow-hidden bg-white px-4 py-3"
           data-speed-fill-percent={speedFillPercent}
         >
           <div
             aria-hidden="true"
-            className="absolute inset-y-0 left-0 z-0 bg-[#c05df2] transition-[width] duration-700 ease-linear"
+            className="absolute inset-y-0 left-0 z-0 w-full origin-left bg-[#c05df2] transition-transform duration-1000 ease-linear will-change-transform"
             data-speed-fill
-            style={{ width: `${speedFillPercent}%` }}
+            style={{ transform: `scaleX(${speedFillScale})` }}
           />
           <div className="relative z-10 flex items-center gap-3">
             <Timer className="size-6 stroke-[3]" aria-hidden="true" />

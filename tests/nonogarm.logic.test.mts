@@ -165,6 +165,11 @@ test("speed bonus fill drains as time increases", () => {
   assert.equal(getSpeedFillPercent(200), 0);
 });
 
+test("speed bonus fill keeps fractional progress for smooth animation", () => {
+  assert.ok(Math.abs(getSpeedFillPercent(1) - 99.111) < 0.001);
+  assert.ok(Math.abs(getSpeedFillPercent(5) - 95.556) < 0.001);
+});
+
 test("getLevelProgress starts at level zero and advances from score XP", () => {
   assert.deepEqual(getLevelProgress(0), {
     level: 0,
