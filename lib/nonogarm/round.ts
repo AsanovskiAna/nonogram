@@ -1,12 +1,18 @@
 import { isActorMatch } from "./matching.ts";
-import { createEmptyMarks, isSolved } from "./puzzle.ts";
+import {
+  createEmptyMarks,
+  createRoundSeed,
+  generateActorPatches,
+  isSolved,
+} from "./puzzle.ts";
 import { scoreActorGuess, scorePatchSolve } from "./scoring.ts";
-import type { ActorEntry, ActorPatch, BoardMarks, CellMark } from "./types.ts";
+import type { ActorEntry, ActorPatch, ActorProfile, BoardMarks, CellMark } from "./types.ts";
 
 export type RoundStatus = "playing" | "won";
 
 export type RoundState = {
   actor: ActorEntry;
+  roundSeed: string;
   selectedPatchId: string | null;
   currentMarks: BoardMarks;
   revealedPatchIds: string[];
@@ -24,14 +30,25 @@ function cloneMarks(marks: BoardMarks): BoardMarks {
   return marks.map((row) => [...row]);
 }
 
-export function createRound(actor: ActorEntry, nowSeconds: number): RoundState {
+export function createRound(
+  actor: ActorProfile,
+  nowSeconds: number,
+  roundSeed = createRoundSeed(),
+  streak = 0,
+): RoundState {
+  const roundActor: ActorEntry = {
+    ...actor,
+    patches: generateActorPatches(actor.id, roundSeed),
+  };
+
   return {
-    actor,
+    actor: roundActor,
+    roundSeed,
     selectedPatchId: null,
     currentMarks: [],
     revealedPatchIds: [],
     score: 0,
-    streak: 0,
+    streak,
     startedAt: nowSeconds,
     activePatchStartedAt: null,
     wrongSubmitsByPatch: {},
@@ -131,7 +148,6 @@ export function submitActivePatch(
           ...round.wrongSubmitsByPatch,
           [patch.id]: wrongSubmits + 1,
         },
-        streak: 0,
         guessFeedback: "Not quite. Check the clues.",
       },
       solved: false,

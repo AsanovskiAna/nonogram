@@ -8,7 +8,7 @@ import {
   getBoardPuzzleMaxWidth,
   getColumnClueLines,
 } from "../lib/nonogarm/layout.ts";
-import { getClues, getPatchSize, isSolved } from "../lib/nonogarm/puzzle.ts";
+import { generateActorPatches, getClues, getPatchSize, isSolved } from "../lib/nonogarm/puzzle.ts";
 import {
   clearActivePatch,
   createRound,
@@ -27,12 +27,58 @@ import {
   scorePatchSolve,
 } from "../lib/nonogarm/scoring.ts";
 import { isActorMatch, normalizeGuess } from "../lib/nonogarm/matching.ts";
+import type { ActorPatch } from "../lib/nonogarm/types.ts";
+
+function serializePatchSolutions(patches: ActorPatch[]): string[] {
+  return patches.map(
+    (patch) =>
+      `${patch.id}:${patch.solution
+        .map((row) => row.map((filled) => (filled ? "1" : "0")).join(""))
+        .join("/")}`,
+  );
+}
+
+function serializeSolution(patch: ActorPatch): string {
+  return patch.solution
+    .map((row) => row.map((filled) => (filled ? "1" : "0")).join(""))
+    .join("/");
+}
 
 test("getPatchSize returns 8 for center patches and 5 for outer patches", () => {
   assert.equal(getPatchSize(1, 1), 8);
   assert.equal(getPatchSize(2, 2), 8);
   assert.equal(getPatchSize(0, 0), 5);
   assert.equal(getPatchSize(3, 2), 5);
+});
+
+test("generateActorPatches creates stable unique puzzles from a round seed", () => {
+  const first = generateActorPatches("ava-sterling", "round-a");
+  const again = generateActorPatches("ava-sterling", "round-a");
+  const otherRound = generateActorPatches("ava-sterling", "round-b");
+
+  assert.equal(first.length, 16);
+  assert.equal(first.filter((patch) => patch.size === 8).length, 4);
+  assert.equal(first.filter((patch) => patch.size === 5).length, 12);
+  assert.deepEqual(serializePatchSolutions(first), serializePatchSolutions(again));
+  assert.notDeepEqual(serializePatchSolutions(first), serializePatchSolutions(otherRound));
+  assert.equal(new Set(first.map(serializeSolution)).size, 16);
+});
+
+test("createRound attaches generated puzzles and keeps explicit seeds deterministic", () => {
+  const first = createRound(ACTORS[0], 0, "memory-seed-a");
+  const again = createRound(ACTORS[0], 30, "memory-seed-a");
+  const otherRound = createRound(ACTORS[0], 0, "memory-seed-b");
+
+  assert.equal(first.roundSeed, "memory-seed-a");
+  assert.equal(first.actor.patches.length, 16);
+  assert.deepEqual(
+    serializePatchSolutions(first.actor.patches),
+    serializePatchSolutions(again.actor.patches),
+  );
+  assert.notDeepEqual(
+    serializePatchSolutions(first.actor.patches),
+    serializePatchSolutions(otherRound.actor.patches),
+  );
 });
 
 test("getClues compresses filled cell runs and uses 0 for empty rows", () => {
@@ -141,12 +187,14 @@ test("bankRoundScore carries level XP across actor rounds", () => {
   assert.equal(bankRoundScore(careerScore, 0), 750);
 });
 
-test("actor data includes three actors with sixteen correctly sized patches each", () => {
+test("actor catalog includes three actors and generated rounds include sized patches", () => {
   assert.equal(ACTORS.length, 3);
   for (const actor of ACTORS) {
-    assert.equal(actor.patches.length, 16);
-    assert.equal(actor.patches.filter((patch) => patch.size === 8).length, 4);
-    assert.equal(actor.patches.filter((patch) => patch.size === 5).length, 12);
+    const round = createRound(actor, 0, `catalog-${actor.id}`);
+
+    assert.equal(round.actor.patches.length, 16);
+    assert.equal(round.actor.patches.filter((patch) => patch.size === 8).length, 4);
+    assert.equal(round.actor.patches.filter((patch) => patch.size === 5).length, 12);
   }
 });
 
@@ -189,8 +237,8 @@ test("getBoardGridTemplate lets row clues expand without wrapping", () => {
 });
 
 test("round state supports selecting, marking, undoing, clearing, and solving a patch", () => {
-  let round = createRound(ACTORS[0], 0);
-  const patch = ACTORS[0].patches.find((candidate) => candidate.size === 5)!;
+  let round = createRound(ACTORS[0], 0, "round-flow");
+  const patch = round.actor.patches.find((candidate) => candidate.size === 5)!;
 
   assert.equal(round.streak, 0);
 
@@ -224,8 +272,8 @@ test("round state supports selecting, marking, undoing, clearing, and solving a 
 });
 
 test("selecting a patch creates a status message", () => {
-  const round = createRound(ACTORS[0], 0);
-  const patch = ACTORS[0].patches[0];
+  const round = createRound(ACTORS[0], 0, "status-message");
+  const patch = round.actor.patches[0];
 
   const selected = selectPatch(round, patch.id, 0);
 
@@ -233,9 +281,9 @@ test("selecting a patch creates a status message", () => {
   assert.equal(selected.guessFeedback, "Patch 1-1 selected.");
 });
 
-test("round state resets streak after a wrong patch check or actor guess", () => {
-  let round = createRound(ACTORS[0], 0);
-  const patches = ACTORS[0].patches.filter((candidate) => candidate.size === 5);
+test("round state preserves streak after wrong patch checks and resets after wrong actor guesses", () => {
+  let round = createRound(ACTORS[0], 0, "streak-reset");
+  const patches = round.actor.patches.filter((candidate) => candidate.size === 5);
 
   round = selectPatch(round, patches[0].id, 0);
   for (let row = 0; row < patches[0].solution.length; row += 1) {
@@ -251,7 +299,7 @@ test("round state resets streak after a wrong patch check or actor guess", () =>
 
   round = selectPatch(round, patches[1].id, 10);
   round = submitActivePatch(round, 14).round;
-  assert.equal(round.streak, 0);
+  assert.equal(round.streak, 1);
 
   round = submitActorGuess(round, "not right", 20).round;
   assert.equal(round.streak, 0);
@@ -269,4 +317,13 @@ test("round state keeps wrong guesses alive and ends on a forgiving correct gues
   assert.equal(right.correct, true);
   assert.equal(right.round.streak, 1);
   assert.ok(right.actorScore > 0);
+});
+
+test("new rounds can preserve a correct-guess streak", () => {
+  const round = createRound(ACTORS[0], 0, "carry-streak-a", 2);
+  const right = submitActorGuess(round, ACTORS[0].displayName, 20);
+  const nextRound = createRound(ACTORS[1], 30, "carry-streak-b", right.round.streak);
+
+  assert.equal(right.round.streak, 3);
+  assert.equal(nextRound.streak, 3);
 });

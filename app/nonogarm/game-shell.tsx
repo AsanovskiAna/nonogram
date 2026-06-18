@@ -14,7 +14,7 @@ import {
   type RoundState,
 } from "@/lib/nonogarm/round.ts";
 import { bankRoundScore } from "@/lib/nonogarm/scoring.ts";
-import type { CellMark } from "@/lib/nonogarm/types.ts";
+import type { CellMark, SolutionGrid } from "@/lib/nonogarm/types.ts";
 import {
   GuessPanel,
   HeaderBanner,
@@ -33,6 +33,12 @@ function nowSeconds(): number {
 
 function createInitialRound(): RoundState {
   return createRound(ACTORS[0], nowSeconds());
+}
+
+function formatSolutionForConsole(solution: SolutionGrid): string {
+  return solution
+    .map((row) => row.map((filled) => (filled ? "#" : ".")).join(" "))
+    .join("\n");
 }
 
 export function GameShell() {
@@ -59,7 +65,17 @@ export function GameShell() {
   const levelScore = careerScore + round.score;
 
   function handleSelectPatch(patchId: string) {
-    setRound((current) => selectPatch(current, patchId, nowSeconds()));
+    setRound((current) => {
+      const patch = current.actor.patches.find((candidate) => candidate.id === patchId);
+
+      if (patch && !current.revealedPatchIds.includes(patch.id) && current.status !== "won") {
+        console.log(
+          `[Nonogarm] Solution ${patch.row + 1}-${patch.col + 1} (${patch.size}x${patch.size})\n${formatSolutionForConsole(patch.solution)}`,
+        );
+      }
+
+      return selectPatch(current, patchId, nowSeconds());
+    });
   }
 
   function handleToggleCell(row: number, col: number) {
@@ -84,7 +100,7 @@ export function GameShell() {
     const nextIndex = (actorIndex + 1) % ACTORS.length;
     setCareerScore((currentScore) => bankRoundScore(currentScore, round.score));
     setActorIndex(nextIndex);
-    setRound(createRound(ACTORS[nextIndex], nowSeconds()));
+    setRound(createRound(ACTORS[nextIndex], nowSeconds(), undefined, round.streak));
     setGuess("");
     setMode("filled");
     setElapsedSeconds(0);

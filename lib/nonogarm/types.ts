@@ -13,13 +13,16 @@ export type ActorPatch = {
   solution: SolutionGrid;
 };
 
-export type ActorEntry = {
+export type ActorProfile = {
   id: string;
   displayName: string;
   aliases: string[];
   difficulty: Difficulty;
   difficultyMultiplier: number;
   portrait: string;
+};
+
+export type ActorEntry = ActorProfile & {
   patches: ActorPatch[];
 };
 
