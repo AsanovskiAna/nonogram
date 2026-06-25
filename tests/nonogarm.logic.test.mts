@@ -3,6 +3,11 @@ import { existsSync } from "node:fs";
 import test from "node:test";
 import { ACTORS } from "../lib/nonogarm/actors.ts";
 import {
+  AUDIO_TRACKS,
+  getRoundAudioCue,
+  type RoundAudioSnapshot,
+} from "../lib/nonogarm/audio.ts";
+import {
   getBoardFrame,
   getBoardGridTemplate,
   getBoardPanelStyle,
@@ -260,6 +265,58 @@ test("actor catalog includes 20 regional musicians with local portraits", () => 
     assert.equal(round.actor.patches.filter((patch) => patch.size === 8).length, 4);
     assert.equal(round.actor.patches.filter((patch) => patch.size === 5).length, 12);
   }
+});
+
+test("audio catalog points at local generated music assets", () => {
+  assert.deepEqual(AUDIO_TRACKS, {
+    loop: "/audio/nonogarm-loop.wav",
+    correct: "/audio/correct.wav",
+    wrong: "/audio/wrong.wav",
+    win: "/audio/win.wav",
+  });
+
+  for (const src of Object.values(AUDIO_TRACKS)) {
+    assert.equal(existsSync(new URL(`../public${src}`, import.meta.url)), true);
+  }
+});
+
+test("round audio cues follow patch and guess state transitions", () => {
+  const base: RoundAudioSnapshot = {
+    guessFeedback: "Patch 1-1 selected.",
+    revealedPatchCount: 0,
+    status: "playing",
+  };
+
+  assert.equal(
+    getRoundAudioCue(base, {
+      ...base,
+      guessFeedback: "Great solve. +240 points.",
+      revealedPatchCount: 1,
+    }),
+    "correct",
+  );
+  assert.equal(
+    getRoundAudioCue(base, {
+      ...base,
+      guessFeedback: "Not quite. Try again.",
+    }),
+    "wrong",
+  );
+  assert.equal(
+    getRoundAudioCue(base, {
+      ...base,
+      guessFeedback: "Correct. Marija Serifovic solved.",
+      status: "won",
+    }),
+    "win",
+  );
+  assert.equal(
+    getRoundAudioCue(base, {
+      ...base,
+      guessFeedback: "Patch 2-2 selected.",
+    }),
+    null,
+  );
 });
 
 test("getBoardFrame gives 5x5 and 8x8 puzzles the same frame", () => {

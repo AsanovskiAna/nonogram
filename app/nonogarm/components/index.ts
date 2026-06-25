@@ -1,3 +1,4 @@
+export { GameAudio } from "./game-audio";
 export { GuessPanel } from "./guess-panel";
 export { HeaderBanner } from "./header-banner";
 export { NonogramBoard } from "./nonogram-board";

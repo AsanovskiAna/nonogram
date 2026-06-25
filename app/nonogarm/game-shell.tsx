@@ -23,6 +23,7 @@ import {
 import { bankRoundScore } from "@/lib/nonogarm/scoring.ts";
 import type { CellMark, SolutionGrid } from "@/lib/nonogarm/types.ts";
 import {
+  GameAudio,
   GuessPanel,
   HeaderBanner,
   NonogramBoard,
@@ -91,6 +92,17 @@ export function GameShell({ initialProgress, isSignedIn }: GameShellProps) {
 
   const activePatch = useMemo(() => (round ? getSelectedPatch(round) : null), [round]);
   const levelScore = careerScore + (round?.score ?? 0);
+  const roundAudioSnapshot = useMemo(
+    () =>
+      round
+        ? {
+            guessFeedback: round.guessFeedback,
+            revealedPatchCount: round.revealedPatchIds.length,
+            status: round.status,
+          }
+        : null,
+    [round],
+  );
 
   function handleSelectPatch(patchId: string) {
     setRound((current) => {
@@ -184,14 +196,17 @@ export function GameShell({ initialProgress, isSignedIn }: GameShellProps) {
           <HeaderBanner />
           <section className="grid gap-4 lg:grid-cols-[minmax(190px,0.65fr)_minmax(0,2.9fr)] xl:gap-5 xl:grid-cols-[minmax(240px,0.82fr)_minmax(0,3.75fr)]">
             <div className="order-5 lg:order-none">
-              <StatusRail
-                difficulty="Easy"
-                isSignedIn={isSignedIn}
-                multiplier={1}
-                score={careerScore}
-                status="won"
-                streak={streak}
-              />
+              <div className="flex flex-col gap-4">
+                <StatusRail
+                  difficulty="Easy"
+                  isSignedIn={isSignedIn}
+                  multiplier={1}
+                  score={careerScore}
+                  status="won"
+                  streak={streak}
+                />
+                <GameAudio roundSnapshot={roundAudioSnapshot} />
+              </div>
             </div>
             <section className="flex min-h-[560px] flex-col items-center justify-center border-4 border-black bg-white p-6 text-center font-mono font-black uppercase shadow-[8px_8px_0_#000]">
               <Trophy
@@ -231,6 +246,7 @@ export function GameShell({ initialProgress, isSignedIn }: GameShellProps) {
                 status={round.status}
                 streak={round.streak}
               />
+              <GameAudio roundSnapshot={roundAudioSnapshot} />
             </div>
           </div>
           <div className="order-3 flex min-w-0 flex-col gap-4 lg:order-none">
